@@ -1,32 +1,43 @@
 # -*- coding: utf-8 -*-
 """game of words MainWindow"""
 from Tkinter import *
+import pygtk
+pygtk.require("2.0")
+import gtk
+#from gi.repository import Gdk
 
 BG_COLOR="#0b0bb0"	#"#0000ff"
 
-class MainWindow (Tk):
+class MainWindow (gtk.Window):#Tk):
 	def __init__(self,d):
-		Tk.__init__(self)
+                super(self.__class__, self).__init__()
+		#Tk.__init__(self)
 		#self
 		self.initialize(d)
 
 	def initialize(self,d):
 		""" initialze mainwindow gui"""
-		self.configure(background=BG_COLOR)
-		w, h = self.winfo_screenwidth(), self.winfo_screenheight()
-		self.geometry("%dx%d+%d+%d" % (w/3, h/2,w/3,h/4))
-		self.d=d
+                color = gtk.gdk.color_parse(BG_COLOR)
+                self.modify_bg(gtk.STATE_NORMAL, color)
+		#self.configure(background=BG_COLOR)
+
+                #s = gtk.gdk.Screen.get_default()
+                w,h = gtk.gdk.screen_width(), gtk.gdk.screen_height() 
+		#w, h = self.winfo_screenwidth(), self.winfo_screenheight()
+		#self.geometry("%dx%d+%d+%d" % (w/3, h/2,w/3,h/4))
+		#self.d=d
+                self.resize(w/3,h/3)
 
 		"""http://stackoverflow.com/questions/18091133/creating-an-entry-table-on-tkinter"""
 		self.entries = {}
 		j=1
 		for column in range(3,8):
 			for row in range(1,column):
-				self.entries[10*column+row]=Entry(self,width=column)
-				self.entries[10*column+row].pack()#grid(row=j,column=5)
+				#self.entries[10*column+row]=Entry(self,width=column)
+				#self.entries[10*column+row].pack()#grid(row=j,column=5)
 				j+=1
-		start_button = Button(self,text='Start',bg=BG_COLOR,fg='yellow',command=self.start_button_click)
-		start_button.pack()
+		#start_button = Button(self,text='Start',bg=BG_COLOR,fg='yellow',command=self.start_button_click)
+		#start_button.pack()
 
 
 	def start_button_click(self):

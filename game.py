@@ -41,7 +41,7 @@ def main():
 	d=gen_table(syll)
 	#print_table(d)
 	app = MainWindow (d)
-	app.mainloop()
+	#app.mainloop()
 
 
 if __name__ == "__main__":
