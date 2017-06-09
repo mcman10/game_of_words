@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 """game of words"""
 
+from twisted.internet import gtk2reactor
+gtk2reactor.install()
 from random import randint
 from mainwindow import MainWindow
-#from Tkinter import StringVar
 
 def print_table(d):
 	for i in range(3,8):
@@ -24,7 +25,6 @@ def gen_table(syll):
 			d[10*i+j]="".join(w)
 	return d
 
-
 def rand_syll():
 	""" generate a random russian syllable """
 	vovels={1:'а',2:'е',3:'ё',4:'и',5:'о',6:'у',7:'ы',8:'э',9:'ю',10:'я'}
@@ -42,7 +42,8 @@ def main():
 	#print_table(d)
 	app = MainWindow (d)
 	#app.mainloop()
-
+        from twisted.internet import reactor
+        reactor.run()
 
 if __name__ == "__main__":
 	main()
