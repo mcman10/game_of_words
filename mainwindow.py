@@ -26,12 +26,15 @@ class MainWindow (gtk.Window):
                 self.resize(w/2,h/2)
 
                 table = gtk.Table(rows=20, columns=7, homogeneous=True)
+                self.add(table)
 
                 current_length = 3
                 change_length_where_row = 3
                 for column in range (7):
                     for row in range (20):
-                        self.entries[row][column] = gtk.Entry()
+                        self.entries[row][column] = gtk.Entry(max=1)
+                        table.attach(self.entries[row][column], column, column+1, row, row+1, xoptions = gtk.SHRINK, yoptions = gtk.SHRINK )
+                        self.entries[row][column].show()
 
 		j=1
 		for column in range(3,8):
