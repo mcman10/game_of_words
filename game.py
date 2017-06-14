@@ -40,8 +40,8 @@ def main():
 	syll=rand_syll()
 	d=gen_table(syll)
 	#print_table(d)
-	app = MainWindow (d)
-	#app.mainloop()
+	app = MainWindow ()
+	app.set_letters(d)
         from twisted.internet import reactor
         reactor.run()
 
