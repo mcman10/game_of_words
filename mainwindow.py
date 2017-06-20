@@ -6,6 +6,7 @@ import gtk
 import datetime
 from twisted.internet.task import LoopingCall
 from random import randint
+from network import check_word
 
 #BG_COLOR="#0b0bb0"	
 
@@ -15,10 +16,10 @@ def print_table(d):
 			print d[i*10+j]
 
 def gen_table(syll):
-	"""generate a game table as dict d {31:'??.',32:'.??',41:'??..',42:'.??.',...} """
-	d = {31:'...',32:'...',41:'....',42:'....',43:'....',51:'.....',52:'.....',53:'.....',54:'.....',
-			61:'......',62:'......',63:'......',64:'......',65:'......',
-			71:'.......',72:'.......',73:'.......',74:'.......',75:'.......',76:'.......'}
+	"""generate a game table as dict d {31:"??`",32:"`??",41:"??``",42:"`??`",...} """
+	d = {31:"```",32:"```",41:"````",42:"````",43:"````",51:"`````",52:"`````",53:"`````",54:"`````",
+			61:"``````",62:"``````",63:"``````",64:"``````",65:"``````",
+			71:"```````",72:"```````",73:"```````",74:"```````",75:"```````",76:"```````"}
 	for i in range(3,8):
 		for j in range(1,i):
 			w=list(d[10*i+j])
@@ -135,3 +136,20 @@ class MainWindow (gtk.Window):
             self.time_label.set_text(str(datetime.datetime.now()-self.start_time))
             self.start_button.set_sensitive(True)
             self.check_button.set_sensitive(False)
+            lst =  self.collect_words()
+            print lst
+            for word in lst:
+                print check_word(word)
+
+        def collect_words(self):
+            list = []
+            for row in range (20):
+                word = ""
+                for column in range (7):
+                    if self.entries[row][column]:
+                        letter = self.entries[row][column].get_text() 
+                        word += letter.decode('utf-8')
+                print word
+                            
+                list.append(word)
+            return list
