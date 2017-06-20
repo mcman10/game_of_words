@@ -47,6 +47,8 @@ class MainWindow (gtk.Window):
             self.entries = [[None for col in range(7)] for col in range(20)] 
 	    self.initialize()
             self.set_position(gtk.WIN_POS_CENTER)
+            #self.apply_icon = gtk.STOCK_APPLY 
+            #self.cancel_icon = gtk.STOCK_CANCEL
             self.show_all()
 
 	def initialize(self):

@@ -7,7 +7,9 @@ import re
 from grab import Grab, GrabError
 
 g = Grab(log_file='out.html')
-proxy = os.environ['http_proxy']
+proxy=''
+if 'http_proxy' in os.environ:
+    proxy = os.environ['http_proxy']
 
 if proxy:
     g.setup(proxy=proxy, proxy_type='http', connect_timeout=5, timeout=5)
@@ -23,5 +25,3 @@ def check_word(word):
     print 'result ',r
     return any(char.isdigit() for char in r)
 
-#print check_word(u'jlkjlkj')
-#print check_word(u'слово')
