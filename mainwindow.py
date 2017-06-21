@@ -11,7 +11,7 @@ from network import check_word
 #BG_COLOR="#0b0bb0"	
 
 def print_table(d):
-	for i in range(3,8):
+	for i in range(3,7):
 		for j in range(1,i):
 			print d[i*10+j]
 
@@ -44,11 +44,16 @@ class MainWindow (gtk.Window):
             self.set_title("Game of Words")
             self.connect("delete-event", gtk.main_quit)
 
-            self.entries = [[None for col in range(7)] for col in range(20)] 
-	    self.initialize()
+            self.entries = [[None for col in range(8)] for col in range(20)] 
+            self.icons = []
             self.set_position(gtk.WIN_POS_CENTER)
-            #self.apply_icon = gtk.STOCK_APPLY 
-            #self.cancel_icon = gtk.STOCK_CANCEL
+            self.apply_icon = gtk.Image()
+            self.cancel_icon = gtk.Image()
+            self.question_icon = gtk.Image()
+            self.apply_icon.set_from_stock(gtk.STOCK_SPELL_CHECK, gtk.ICON_SIZE_BUTTON)
+            self.cancel_icon.set_from_stock(gtk.STOCK_CANCEL, gtk.ICON_SIZE_BUTTON)
+            self.question_icon.set_from_stock(gtk.STOCK_DIALOG_QUESTION, gtk.ICON_SIZE_BUTTON)
+	    self.initialize()
             self.show_all()
 
 	def initialize(self):
@@ -61,9 +66,9 @@ class MainWindow (gtk.Window):
             self.resize(w/2,h/2)
 
             #TABLE OF ENTRIES WIRH LETTERS
-            table = gtk.Table(rows=20, columns=7, homogeneous=True)
+            self.table = gtk.Table(rows=20, columns=8, homogeneous=True)
             letters_alignment = gtk.Alignment(xalign=0, yalign=0.5)
-            letters_alignment.add(table)
+            letters_alignment.add(self.table)
 
             current_length = 3
             change_length_where_row = 3
@@ -73,11 +78,16 @@ class MainWindow (gtk.Window):
                         self.entries[row][column] = gtk.Entry(max=1)
                         self.entries[row][column].set_width_chars(2)
                         self.entries[row][column].get_settings().set_string_property('gtk-font-name', 'sans normal 12','');
-                        table.attach(self.entries[row][column], column, column+1, row, row+1, xoptions = gtk.SHRINK, yoptions = gtk.SHRINK, xpadding=3,ypadding=3 )
+                        self.table.attach(self.entries[row][column], column, column+1, row, row+1,
+                                xoptions = gtk.SHRINK, yoptions = gtk.SHRINK, xpadding=3,ypadding=3 )
                         self.entries[row][column].show()
                     if row+1 == change_length_where_row: 
                         change_length_where_row += current_length
                         current_length +=1
+
+            settings = gtk.settings_get_default()
+            settings.props.gtk_button_images = True
+
 
             #INFORMATION LABELS
             self.time_label = gtk.Label("00:00:00")
@@ -129,6 +139,7 @@ class MainWindow (gtk.Window):
             self.lc.start(1)
             self.start_button.set_sensitive(False)
             self.check_button.set_sensitive(True)
+            self.set_table_icons_question()
 
         def tired_task(self):
             self.time_label.set_text(str(datetime.datetime.now()-self.start_time))
@@ -140,8 +151,20 @@ class MainWindow (gtk.Window):
             self.check_button.set_sensitive(False)
             lst =  self.collect_words()
             print lst
+            i = 0
             for word in lst:
-                print check_word(word)
+                #print check_word(word)
+                if check_word(word):
+                    self.icons[i].clear()
+                    self.icons[i].set_from_stock(gtk.STOCK_SPELL_CHECK, gtk.ICON_SIZE_BUTTON)
+                    self.icons[i].queue_draw()
+                    print 'True'
+                else:
+                    self.icons[i].clear()
+                    self.icons[i].set_from_stock(gtk.STOCK_CANCEL, gtk.ICON_SIZE_BUTTON)
+                    self.icons[i].queue_draw()
+                    print 'False'
+                i+=1
 
         def collect_words(self):
             list = []
@@ -155,3 +178,16 @@ class MainWindow (gtk.Window):
                             
                 list.append(word)
             return list
+
+        def set_table_icons_question(self):
+            for icon in self.icons :
+                icon.clear()
+                icon.queue_draw()
+                del(icon)
+            self.icons = []
+            for i in range (20):
+                icon = gtk.Image()
+                icon.set_from_stock(gtk.STOCK_DIALOG_QUESTION, gtk.ICON_SIZE_BUTTON)
+                self.table.attach(icon, 7,8,i,i+1, xoptions = gtk.SHRINK, yoptions = gtk.SHRINK, xpadding= 1, ypadding=1)
+                self.icons.append(icon)
+                icon.show()
