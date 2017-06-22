@@ -4,9 +4,10 @@ import pygtk
 pygtk.require("2.0")
 import gtk
 import datetime
-from twisted.internet.task import LoopingCall
+import gobject
 from random import randint
 from network import check_word
+from records import get_records, add_record
 
 #BG_COLOR="#0b0bb0"	
 
@@ -44,6 +45,7 @@ class MainWindow (gtk.Window):
             self.set_title("Game of Words")
             self.connect("delete-event", gtk.main_quit)
 
+            self.score = 0
             self.entries = [[None for col in range(8)] for col in range(20)] 
             self.icons = []
             self.set_position(gtk.WIN_POS_CENTER)
@@ -90,23 +92,29 @@ class MainWindow (gtk.Window):
 
 
             #INFORMATION LABELS
+            self.score_label = gtk.Label(str(self.score))
             self.time_label = gtk.Label("00:00:00")
             time_frame = gtk.Frame(label="time")
             time_frame.add(self.time_label)
+            score_frame = gtk.Frame(label="score")
+            score_frame.add(self.score_label)
             labels_vbox = gtk.VBox(homogeneous=False, spacing=5)
             labels_vbox.add(time_frame)
+            labels_vbox.add(score_frame)
             labels_alignment = gtk.Alignment(xalign=0.5, yalign=0.05, xscale = 0.95)
             labels_alignment.add(labels_vbox)
 
             #CONTROL BUTTONS
             self.start_button = gtk.Button(label="start")
             self.check_button = gtk.Button(label="check")
+            self.fame_button = gtk.Button(label="hall of fame")
             self.check_button.connect("clicked", self.check_button_clicked)
             self.check_button.set_sensitive(False)
             self.start_button.connect("clicked", self.start_button_clicked)
             button_vbox = gtk.VBox(homogeneous=True, spacing=5)
             button_vbox.add(self.start_button)
             button_vbox.add(self.check_button)
+            button_vbox.add(self.fame_button)
 
             buttons_alignment = gtk.Alignment(xalign =0.9, yalign=0.05, xscale=0.95)
             buttons_alignment.add(button_vbox)
@@ -117,8 +125,6 @@ class MainWindow (gtk.Window):
             main_hbox.add(labels_alignment)
             main_hbox.add(buttons_alignment)
             self.add(main_hbox)
-
-            
 
         def set_letters(self, d):
             row, column = 0,0 
@@ -131,39 +137,49 @@ class MainWindow (gtk.Window):
                     row+=1
 
 	def start_button_clicked(self, widget, data=None):
+            self.score = 0 
+            self.score_label.set_text(str(self.score))
+            self.running = True
             syll = rand_syll()
             d=gen_table(syll)
             self.set_letters(d)
+            self.set_table_icons_question()
             self.start_time = datetime.datetime.now()
-            self.lc = LoopingCall(self.tired_task)
-            self.lc.start(1)
+            gobject.timeout_add(100, self.tired_task)
             self.start_button.set_sensitive(False)
             self.check_button.set_sensitive(True)
-            self.set_table_icons_question()
 
         def tired_task(self):
             self.time_label.set_text(str(datetime.datetime.now()-self.start_time))
+            return self.running
 
 	def check_button_clicked(self, widget, data=None):
-            self.lc.stop()
+            records_list = get_records()
+            #print records_list
+            self.running = False
             self.time_label.set_text(str(datetime.datetime.now()-self.start_time))
             self.start_button.set_sensitive(True)
             self.check_button.set_sensitive(False)
             lst =  self.collect_words()
-            print lst
             i = 0
             for word in lst:
                 #print check_word(word)
                 if check_word(word):
+                    self.score += len(word) 
+                    self.score_label.set_text(str(self.score))
                     self.icons[i].clear()
                     self.icons[i].set_from_stock(gtk.STOCK_SPELL_CHECK, gtk.ICON_SIZE_BUTTON)
                     self.icons[i].queue_draw()
-                    print 'True'
+                    while (gtk.events_pending ()):
+                            gtk.main_iteration ();
+                    #print 'True'
                 else:
                     self.icons[i].clear()
                     self.icons[i].set_from_stock(gtk.STOCK_CANCEL, gtk.ICON_SIZE_BUTTON)
                     self.icons[i].queue_draw()
-                    print 'False'
+                    while (gtk.events_pending ()):
+                            gtk.main_iteration ();
+                    #print 'False'
                 i+=1
 
         def collect_words(self):
@@ -174,7 +190,7 @@ class MainWindow (gtk.Window):
                     if self.entries[row][column]:
                         letter = self.entries[row][column].get_text() 
                         word += letter.decode('utf-8')
-                print word
+                #print word
                             
                 list.append(word)
             return list
@@ -182,7 +198,7 @@ class MainWindow (gtk.Window):
         def set_table_icons_question(self):
             for icon in self.icons :
                 icon.clear()
-                icon.queue_draw()
+                #icon.queue_draw()
                 del(icon)
             self.icons = []
             for i in range (20):
