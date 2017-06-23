@@ -140,8 +140,8 @@ class MainWindow (gtk.Window):
             self.score = 0 
             self.score_label.set_text(str(self.score))
             self.running = True
-            syll = rand_syll()
-            d=gen_table(syll)
+            self.syll = rand_syll()
+            d=gen_table(self.syll)
             self.set_letters(d)
             self.set_table_icons_question()
             self.start_time = datetime.datetime.now()
@@ -157,7 +157,8 @@ class MainWindow (gtk.Window):
             records_list = get_records()
             #print records_list
             self.running = False
-            self.time_label.set_text(str(datetime.datetime.now()-self.start_time))
+            time = str(datetime.datetime.now()-self.start_time)
+            self.time_label.set_text(time)
             self.start_button.set_sensitive(True)
             self.check_button.set_sensitive(False)
             lst =  self.collect_words()
@@ -172,15 +173,16 @@ class MainWindow (gtk.Window):
                     self.icons[i].queue_draw()
                     while (gtk.events_pending ()):
                             gtk.main_iteration ();
-                    #print 'True'
                 else:
                     self.icons[i].clear()
                     self.icons[i].set_from_stock(gtk.STOCK_CANCEL, gtk.ICON_SIZE_BUTTON)
                     self.icons[i].queue_draw()
                     while (gtk.events_pending ()):
                             gtk.main_iteration ();
-                    #print 'False'
                 i+=1
+
+            utf_syll = self.syll[0].decode('utf-8')+self.syll[1].decode('utf-8')
+            add_record(self.score, utf_syll, "None", time)
 
         def collect_words(self):
             list = []
@@ -190,9 +192,8 @@ class MainWindow (gtk.Window):
                     if self.entries[row][column]:
                         letter = self.entries[row][column].get_text() 
                         word += letter.decode('utf-8')
-                #print word
-                            
-                list.append(word)
+                #print word.lower()
+                list.append(word.lower())
             return list
 
         def set_table_icons_question(self):
